@@ -20,9 +20,9 @@ This guide explains how to deploy a web application (a Vite/React frontend and a
 
 ## Prerequisites
 
-- **Development Tools:** Node.js, npm, Git, Docker, Docker Compose.
+- **Nginx:**  Must be installed on remote SSH.
 - **Access/Accounts:** GitHub, Cloudflare.
-- **Server:** A cloud or VPS server (e.g., Ubuntu 20.04) with a public IP.
+- **Remote SSH:** A cloud or VPS server (e.g., Ubuntu 20.04) with a public IP.
 - **Certbot:** Installed on your server if you’re obtaining SSL directly (or use a companion container).
 
 
