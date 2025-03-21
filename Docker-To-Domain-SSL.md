@@ -10,7 +10,7 @@ This guide explains how to deploy a web application (a Vite/React frontend and a
 | 1    | [Prerequisites](#prerequisites)                                          | Tools, accounts, and server prerequisites                         |
 | 2    | [Local Development Setup](#local-development-setup)                      | Setting up your local environment                                 |
 | 3    | [Dockerizing the Application](#dockerizing-the-application)              | Containerizing your application with Docker                       |
-| 4    | [Deploying on a Public IP Server](#deploying-on-a-public-ip-server)        | Deploying your application on a server with a public IP           |
+| 4    | [Deploying on a Public IP](#deploying-on-a-public-ip)        | Deploying your application on a server with a public IP           |
 | 5    | [Configuring Cloudflare DNS](#configuring-cloudflare-dns)                  | Setting up Cloudflare DNS records                                 |
 | 6    | [Setting Up Nginx Reverse Proxy](#setting-up-nginx-reverse-proxy) | Configuring Nginx as your reverse proxy                           |
 | 7    | [Obtaining and Deploying SSL Certificates](#obtaining-and-deploying-ssl-certificates) | Using Certbot and Let's Encrypt for SSL                           |
@@ -122,7 +122,7 @@ This guide explains how to deploy a web application (a Vite/React frontend and a
     `NOTE: During development, use .env; in production, the build process will use .env.production (make sure these files are in your build context).`
 
 
-## Deploying on a Public IP (Dabba)
+## Deploying on a Public IP
 
 1. Open SSH and Clone project repo:
     ```bash
