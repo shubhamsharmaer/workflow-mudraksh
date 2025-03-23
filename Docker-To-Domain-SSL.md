@@ -9,132 +9,50 @@ This guide explains how to deploy a web application (a Vite/React frontend and a
 |------|--------------------------------------------------------------------------|-------------------------------------------------------------------|
 | 1    | [Prerequisites](#prerequisites)                                          | Tools, accounts, and server prerequisites                         |
 | 2    | [Local Development Setup](#local-development-setup)                      | Setting up your local environment                                 |
-| 3    | [Dockerizing the Application](#dockerizing-the-application)              | Containerizing your application with Docker                       |
-| 4    | [Deploying on a Public IP](#deploying-on-a-public-ip)        | Deploying your application on a server with a public IP           |
-| 5    | [Configuring Cloudflare DNS](#configuring-cloudflare-dns)                  | Setting up Cloudflare DNS records                                 |
-| 6    | [Setting Up Nginx Reverse Proxy](#setting-up-nginx-reverse-proxy) | Configuring Nginx as your reverse proxy                           |
-| 7    | [Obtaining and Deploying SSL Certificates](#obtaining-and-deploying-ssl-certificates) | Using Certbot and Let's Encrypt for SSL                           |
-| 8    | [Common Issues and Troubleshooting](#common-issues-and-troubleshooting)    | Tips for troubleshooting common deployment issues                 |
-| 9    | [Summary](#summary)                                                      | Recap of the deployment workflow                                  |
+| 3    | [Configuring Cloudflare DNS](#configuring-cloudflare-dns)                  | Setting up Cloudflare DNS records                                 |
+| 4    | [Setting Up Nginx Reverse Proxy](#setting-up-nginx-reverse-proxy) | Configuring Nginx as your reverse proxy                           |
+| 5    | [Generate SSL Certificates](#generate-ssl-certificates) | Using Certbot and Let's Encrypt for SSL                           |
+| 6    | [Common Issues and Troubleshooting](#common-issues-and-troubleshooting)    | Tips for troubleshooting common deployment issues                 |
 
 
 ## Prerequisites
 
-- **Nginx:**  Must be installed on remote SSH.
-- **Access/Accounts:** GitHub, Cloudflare.
-- **Remote SSH:** A cloud or VPS server (e.g., Ubuntu 20.04) with a public IP.
-- **Certbot:** Installed on your server if you’re obtaining SSL directly (or use a companion container).
+1. **Application Must Be Dockerized**    
+   - **Verification:** Run the foll command to see running containers:
+     ```bash
+     docker ps
+     ```
+     - It should be running on local host on docker
+     ```bash
+     curl http://127.0.0.1:`DABBA PORT`
+     ```
 
+2. **NGINX Installed on Remote Server**    
+   - **Verification:** Check the version and test the configuration:
+     ```bash
+     nginx -v
+     sudo nginx -t
+     ```
+
+3. **Certbot Installed on the Server**  
+   - **Verification:** Check Certbot's version and list your certificates:
+     ```bash
+     sudo certbot --version
+     ```
 
 
 ## Local Development Setup
 
-1. **Clone Your Repository:**
-   ```bash
-   git clone https://github.com/yourusername/yourproject.git
-   cd yourproject
-
-2. **Configure Environment Files:**
+ **Configure Environment Files:**
    For .env 
    ```bash
-   VITE_CLIENT_AUTH_API_URL=http://localhost:7135 ## localhost can be Dabba or Public IP (124.12.135.128)
+   VITE_CLIENT_AUTH_API_URL=http://localhost:7135 ## enter backend endpoint (e.g; 124.12.135.128:7135)
    ```
 
    Create .env.production 
    ```bash
    VITE_CLIENT_AUTH_API_URL=http://'SUB-DOMAIN-NAME'.quanttiphy.com/api ## SUB-DOMAIN your CloudFlare DNS Name (e.g; 'client' in client.quanttiphy.com)
    ```
-
-
-## Dockerizing the Application
-
-#### Create files at root: `docker-compose.yaml`, `Dockerfile`, `nginx.conf` 
-
-- docker-compose.yaml
-    ```bash
-    version: "3.8"
-
-    services:
-    vite-react-app:
-        container_name: client-dashboard-container
-        build:
-        context: .
-        dockerfile: Dockerfile
-        ports:
-        - "DABBA PORT:80"
-        environment:
-        - .env
-    ```
-    
-- Dockerfile
-    ```bash
-    # Use an official Node.js image as a base
-    FROM node:20-alpine AS build
-
-    # Set the working directory inside the container
-    WORKDIR /app
-
-    # Copy package.json and package-lock.json (or yarn.lock) to the working directory
-    COPY package*.json ./
-
-    # Install dependencies
-    RUN npm install
-
-    # Copy the rest of the application code
-    COPY . .
-
-    # Build the application
-    RUN npm run build
-
-    # Create a production image
-    FROM nginx:alpine AS production
-
-    # Copy the built app from the previous stage to the NGINX web server directory
-    COPY --from=build /app/dist /usr/share/nginx/html
-
-    #copy the nginx configuration file
-    COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-    # Expose port 80 for the NGINX server
-    EXPOSE 80
-
-    # Set the timezone of the container to match the host machine's timezone
-    RUN ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
-
-    # Start NGINX when the container starts
-    CMD ["nginx", "-g", "daemon off;"]
-    ```
-
-- nginx.conf
-    ```bash
-        server {
-        listen 80 default_server;
-        server_name _;
-
-        location / {
-            root /usr/share/nginx/html;
-            index index.html;
-            try_files $uri $uri/ /index.html;
-        }
-    }
-    ```
-
-    `NOTE: During development, use .env; in production, the build process will use .env.production (make sure these files are in your build context).`
-
-
-## Deploying on a Public IP
-
-1. Open SSH and Clone project repo:
-    ```bash
-    git clone https://github.com/yourusername/yourproject.git
-    cd yourproject
-    ```
-2. Run Docker Compose: 
-    ```bash
-    docker-compose up -d
-    ```
-    `Verify: Your frontend app should now be accessible locally on the server (e.g., via http://127.0.0.1:DABBA-PORT)`
-
 
 
 ## Configuring Cloudflare DNS
@@ -153,10 +71,10 @@ This guide explains how to deploy a web application (a Vite/React frontend and a
     code /etc/nginx
     ```
 2. Create a Custome file for serving:
-     - Go to `/etc/nginx/sites_available/`
-     - create with any name (e.g; quanttiphy.com)
+     - Go to `/etc/nginx/sites_available/quanttiphy.com`
 
-3. Configure the file:
+3. Configure the file: 
+   - Copy below code and make changes with `DABBA PORT` and `proxy_pass` under `location /api`
     ```bash
         server {
         listen 80;
@@ -178,8 +96,10 @@ This guide explains how to deploy a web application (a Vite/React frontend and a
             proxy_set_header X-Forwarded-Proto $scheme;
         }
 
+        ## if endpoint does not contain /api then use /api/ below
         location /api {
-            proxy_pass http://127.0.0.1:7135/api;
+            ## enter backend endpoint
+            proxy_pass http://127.0.0.1:7135/api; 
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -197,32 +117,29 @@ This guide explains how to deploy a web application (a Vite/React frontend and a
 
 
 
-## Obtaining and Deploying SSL Certificates:
+## Generate SSL Certificates:
 
-1. Install CertBot:
-    ```bash
-    sudo apt install certbot python3-certbot-nginx
-    ```
-2. Request Certificate:
+1. Request Certificate:
     ```bash
     sudo certbot --nginx -d `SUB-DOMAIN`.quanttiphy.com -d www.`SUB-DOMAIN`.quanttiphy.com
     ```
     `It will then ask for some info email enter them.`
+    `If any error occures consider the prequisites above.`
 
-3. Verify Certificate Deployment: 
+2. Verify Certificate Created: 
     - List Certificates Issued by Certbort
     ```bash
     sudo certbot certificates
     ```
     `This command lists all the certificates managed by Certbot, along with their paths and expiration dates.`
 
-4. Make Changes into `etc/nginx/sites_available/YOUR_CUSTOME_FILE`:
+3. Make Changes into `etc/nginx/sites_available/quanttiphy.com`:
     - Open the file and paste below code inside server
 
     ```bash
     server {
         ## Make changes into that server which starts with
-        #listen 443 ssl;
+        ## listen 443 ssl;
 
         ssl_certificate /etc/letsencrypt/live/`SUB-DOMAIN`.quanttiphy.com/fullchain.pem;
         ssl_certificate_key /etc/letsencrypt/live/`SUB-DOMAIN`.quanttiphy.com/privkey.pem;
@@ -230,7 +147,7 @@ This guide explains how to deploy a web application (a Vite/React frontend and a
     }
     ```
 
-5. Test & Reload NGINX
+4. Test & Reload NGINX
     ```bash
     sudo nginx -t
     sudo systemctl reload nginx
