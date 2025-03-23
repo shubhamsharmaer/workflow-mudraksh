@@ -173,3 +173,8 @@ This guide explains how to deploy a web application (a Vite/React frontend and a
 ### Duplicate Server Name Warnings
 
 - Solution: Keep your custom configuration in `/etc/nginx/ sites_available/` and disable the default configuration in `/etc/nginx/sites_enabled/`.
+
+
+ | Previus |  | Next |
+|:-----:|----------|-------------|
+| ⬅️ [Local to Docker](Local-To-Docker.md) | --------------------------------------------------- |  |
