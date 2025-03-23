@@ -106,6 +106,5 @@
  - File Copy Issues: Confirm that the built files are properly copied to `/usr/share/nginx/html` inside the production image.
 
 
- |   |  | Next |
-|:-----:|----------|-------------|
-|    |  | [Docker to Domain](project-documentation.md) ➡️ |
+ | Next | [Docker to Domain](project-documentation.md) ➡️ |
+|:-----:|----------|
