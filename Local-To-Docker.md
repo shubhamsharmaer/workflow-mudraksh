@@ -108,4 +108,4 @@
 
  |   |  | Next |
 |:-----:|----------|-------------|
-|    | --------------------------------------------------- | [Docker to Domain](project-documentation.md) ➡️ |
+|    |  | [Docker to Domain](project-documentation.md) ➡️ |
